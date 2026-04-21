@@ -1,54 +1,106 @@
-<div class="min-h-screen flex items-center justify-center bg-gray-50">
-  <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
+<form (ngSubmit)="onSubmit(registerForm)" #registerForm="ngForm">
 
-    <h2 class="text-2xl font-bold text-center text-blue-900 mb-6">Crear una Cuenta</h2>
-
-    @if (errorMessage) {
-      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-center text-sm">
-        {{ errorMessage }}
-      </div>
-    }
-
-    <form (ngSubmit)="onSubmit()" #registerForm="ngForm">
-
-      <div class="mb-4">
-        <label for="nombre" class="block text-sm font-bold text-gray-700 mb-2">Nombre Completo</label>
-        <input type="text" id="nombre" name="nombre" [(ngModel)]="userData.nombreCompleto" required
-               class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500">
-      </div>
-
-      <div class="mb-4">
-        <label for="email" class="block text-sm font-bold text-gray-700 mb-2">Correo Electrónico</label>
-        <input type="email" id="email" name="email" [(ngModel)]="userData.email" required
-               class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500">
-      </div>
-
-      <div class="mb-4">
-        <label for="password" class="block text-sm font-bold text-gray-700 mb-2">Contraseña</label>
-        <input type="password" id="password" name="password" [(ngModel)]="userData.password" required
-               class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500">
-      </div>
-
-      <div class="mb-6">
-        <label for="rol" class="block text-sm font-bold text-gray-700 mb-2">¿Qué tipo de usuario eres?</label>
-        <select id="rol" name="rol" [(ngModel)]="userData.rol" required
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 bg-white">
-          <option value="INQUILINO">Soy un Inquilino (Busco piso o ya tengo uno)</option>
-          <option value="PROPIETARIO">Soy un Propietario (Quiero gestionar mis pisos)</option>
-        </select>
-      </div>
-
-      <button type="submit" [disabled]="registerForm.invalid"
-              class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200">
-        Registrarse
-      </button>
-    </form>
-
-    <div class="mt-6 text-center text-sm">
-      <p class="text-gray-600">¿Ya tienes cuenta?
-        <a routerLink="/login" class="text-blue-500 font-bold hover:underline">Inicia sesión aquí</a>
-      </p>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+    <div>
+      <label for="nombre" class="block text-sm font-bold text-gray-700 mb-2">Nombre</label>
+      <input type="text" id="nombre" name="nombre"
+             [(ngModel)]="userData.nombre" #nombre="ngModel"
+             required minlength="2" maxlength="50" pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
+             class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+             [class.border-red-500]="nombre.invalid && nombre.touched">
+      @if (nombre.invalid && nombre.touched) {
+        <div class="text-red-500 text-xs mt-1">Nombre inválido.</div>
+      }
     </div>
 
+    <div>
+      <label for="apellidos" class="block text-sm font-bold text-gray-700 mb-2">Apellidos</label>
+      <input type="text" id="apellidos" name="apellidos"
+             [(ngModel)]="userData.apellidos" #apellidos="ngModel"
+             required minlength="2" maxlength="100" pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
+             class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+             [class.border-red-500]="apellidos.invalid && apellidos.touched">
+      @if (apellidos.invalid && apellidos.touched) {
+        <div class="text-red-500 text-xs mt-1">Apellidos inválidos.</div>
+      }
+    </div>
   </div>
-</div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+    <div>
+      <label for="dni" class="block text-sm font-bold text-gray-700 mb-2">DNI / Pasaporte</label>
+      <input type="text" id="dni" name="dni"
+             [(ngModel)]="userData.dniPasaporte" #dni="ngModel"
+             required pattern="^[A-Za-z0-9]{5,20}$"
+             class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase"
+             [class.border-red-500]="dni.invalid && dni.touched">
+      @if (dni.invalid && dni.touched) {
+        <div class="text-red-500 text-xs mt-1">
+          @if (dni.errors?.['required']) { <span>DNI obligatorio.</span> }
+          @if (dni.errors?.['pattern']) { <span>Solo letras y números, sin espacios (5-20 caracteres).</span> }
+        </div>
+      }
+    </div>
+
+    <div>
+      <label for="fechaNacimiento" class="block text-sm font-bold text-gray-700 mb-2">Fecha de Nacimiento</label>
+      <input type="date" id="fechaNacimiento" name="fechaNacimiento"
+             [(ngModel)]="userData.fechaNacimiento" #fecha="ngModel"
+             required
+             class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+             [class.border-red-500]="fecha.invalid && fecha.touched">
+      @if (fecha.invalid && fecha.touched) {
+        <div class="text-red-500 text-xs mt-1">Fecha obligatoria.</div>
+      }
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <label for="email" class="block text-sm font-bold text-gray-700 mb-2">Correo Electrónico</label>
+    <input type="email" id="email" name="email"
+           [(ngModel)]="userData.email" #email="ngModel"
+           required pattern="^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
+           class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+           [class.border-red-500]="email.invalid && email.touched">
+    @if (email.invalid && email.touched) {
+      <div class="text-red-500 text-xs mt-1">Introduce un correo válido.</div>
+    }
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <div>
+      <label for="password" class="block text-sm font-bold text-gray-700 mb-2">Contraseña</label>
+      <input type="password" id="password" name="password"
+             [(ngModel)]="userData.password" #password="ngModel"
+             required pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,}$"
+             class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+             [class.border-red-500]="password.invalid && password.touched">
+      @if (password.invalid && password.touched) {
+        <div class="text-red-500 text-xs mt-1">
+          Mínimo 6 caracteres, incluyendo al menos una letra y un número.
+        </div>
+      }
+    </div>
+
+    <div>
+      <label for="passwordConfirm" class="block text-sm font-bold text-gray-700 mb-2">Repetir Contraseña</label>
+      <input type="password" id="passwordConfirm" name="passwordConfirm"
+             [(ngModel)]="confirmarPassword" #passwordConfirm="ngModel"
+             required pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,}$"
+             class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+             [class.border-red-500]="(passwordConfirm.touched && !contrasenasCoinciden())">
+    </div>
+  </div>
+
+  @if (passwordConfirm.touched && !contrasenasCoinciden()) {
+    <div class="text-red-500 text-xs mb-4 text-center animate-pulse font-medium">
+      ❌ Las contraseñas no coinciden.
+    </div>
+  }
+
+  <button type="submit"
+          [disabled]="registerForm.invalid || !contrasenasCoinciden()"
+          class="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200 shadow">
+    Completar Registro
+  </button>
+</form>

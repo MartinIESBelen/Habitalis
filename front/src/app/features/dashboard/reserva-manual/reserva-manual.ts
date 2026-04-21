@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms'; // Añadido NgForm
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ReservaService } from '../../../core/services/reserva/reserva';
 
@@ -14,12 +14,15 @@ export class ReservaManualComponent implements OnInit {
   apartamentoId!: number;
   cargando = false;
 
-  // El modelo del formulario coincide con tu ReservaManualRequest de Java
+  // Modelo actualizado: Añadidos apellidos, DNI y Fecha de Nacimiento
   form = {
     fechaEntrada: '',
     fechaSalida: '',
     precioBaseAlquiler: 0,
     nombreInquilino: '',
+    apellidosInquilino: '',
+    dniInquilino: '',
+    fechaNacimientoInquilino: '',
     emailInquilino: '',
     telefonoInquilino: ''
   };
@@ -32,12 +35,16 @@ export class ReservaManualComponent implements OnInit {
     this.apartamentoId = Number(this.route.snapshot.paramMap.get('id'));
   }
 
-  guardar() {
+  // Ahora recibimos el formulario para comprobar si es válido
+  guardar(reservaForm: NgForm) {
+    if (reservaForm.invalid) return;
+
     this.cargando = true;
     this.reservaService.crearReservaManual(this.apartamentoId, this.form).subscribe({
       next: () => {
-        alert('¡Contrato e Inquilino registrados correctamente!');
-        this.router.navigate(['/apartamento', this.apartamentoId]);
+        alert('¡Contrato e Inquilino Fantasma registrados correctamente!');
+        // Solucionado el warning de la promesa con "void"
+        void this.router.navigate(['/apartamento', this.apartamentoId]);
       },
       error: (err) => {
         this.cargando = false;

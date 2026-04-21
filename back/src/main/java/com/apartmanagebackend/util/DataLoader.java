@@ -42,7 +42,8 @@ public class DataLoader implements CommandLineRunner {
 
         // Crear PROPIETARIO
         Propietario propietario = Propietario.builder()
-                .nombreCompleto("Martin Sierra")
+                .nombre("Martin")
+                .apellidos("Sierra")
                 .email("propietario@email.com")
                 .password(passwordEncoder.encode("123456")) // Contraseña encriptada
                 .telefono("600123456")
@@ -54,7 +55,8 @@ public class DataLoader implements CommandLineRunner {
         propietarioRepository.save(propietario);
 
         Propietario propietario2 = Propietario.builder()
-                .nombreCompleto("Martin2 Sierra")
+                .nombre("Martin2")
+                .apellidos("Sierra")
                 .email("propietario2@email.com")
                 .password(passwordEncoder.encode("1234567")) // Contraseña encriptada
                 .telefono("600143455")
@@ -67,7 +69,8 @@ public class DataLoader implements CommandLineRunner {
 
         // Crear INQUILINO
         Inquilino inquilino = Inquilino.builder()
-                .nombreCompleto("Martin Godinez")
+                .nombre("Martin")
+                .apellidos("Godinez")
                 .email("inquilino@email.com")
                 .password(passwordEncoder.encode("123456"))
                 .telefono("600654321")

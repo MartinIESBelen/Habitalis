@@ -12,8 +12,11 @@ export interface AuthResponse {
 }
 
 export interface RegisterRequest {
-  nombreCompleto: string;
+  nombre: string;
+  apellidos: string;
   email: string;
   password: string;
+  dniPasaporte: string;
+  fechaNacimiento: string;
   rol: string;
 }

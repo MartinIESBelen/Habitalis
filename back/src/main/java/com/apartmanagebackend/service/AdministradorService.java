@@ -44,7 +44,7 @@ public class AdministradorService {
         return new UsuarioGlobalResponse(
                 usuario.getId(),
                 usuario.getEmail(),
-                usuario.getNombreCompleto(), // O getNombreCompleto() según lo tengas en Usuario.java
+                usuario.getNombre(),
                 usuario.getRol(),
                 usuario.isBloqueado()
         );

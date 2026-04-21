@@ -75,7 +75,8 @@ public class ReservaService {
             String contraseñaFantasma = UUID.randomUUID().toString(); // Imposible de adivinar
 
             Inquilino nuevoInquilino = new Inquilino();
-            nuevoInquilino.setNombreCompleto(request.nombreInquilino());
+            nuevoInquilino.setNombre(request.nombreInquilino());
+
             nuevoInquilino.setEmail(request.emailInquilino());
             nuevoInquilino.setPassword(passwordEncoder.encode(contraseñaFantasma));
             nuevoInquilino.setTelefono(request.telefonoInquilino());
@@ -148,7 +149,7 @@ public class ReservaService {
                 reserva.getPrecioBaseAlquiler(),
                 reserva.getEstado(),
                 reserva.getApartamento().getNombreInterno(),
-                reserva.getInquilino() != null ? reserva.getInquilino().getNombreCompleto() : "Sin asignar"
+                reserva.getInquilino() != null ? reserva.getInquilino().getNombre() : "Sin asignar"
         );
     }
 }

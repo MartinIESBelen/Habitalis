@@ -40,7 +40,7 @@ public class AuthService {
 
         if (request.rol() == RolUsuario.PROPIETARIO) {
             user = Propietario.builder()
-                    .nombreCompleto(request.nombreCompleto())
+                    .nombre(request.nombre())
                     .email(request.email())
                     .password(passwordEncoder.encode(request.password()))
                     .rol(RolUsuario.PROPIETARIO)
@@ -48,7 +48,7 @@ public class AuthService {
         } else {
             // Asumimos Inquilino por defecto
             user = Inquilino.builder()
-                    .nombreCompleto(request.nombreCompleto())
+                    .nombre(request.nombre())
                     .email(request.email())
                     .password(passwordEncoder.encode(request.password()))
                     .rol(RolUsuario.INQUILINO)

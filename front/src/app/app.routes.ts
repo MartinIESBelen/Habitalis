@@ -6,6 +6,7 @@ import { ApartamentoDetails } from './features/dashboard/apartamento-details/apa
 import { ApartamentoEdit } from './features/dashboard/apartamento-edit/apartamento-edit';
 import {ApartamentoCreate} from './features/dashboard/apartamento-create/apartamento-create';
 import {VincularCodigoComponent} from './features/dashboard/vincular-codigo/vincular-codigo';
+import {ReservaManualComponent} from './features/dashboard/reserva-manual/reserva-manual';
 
 export const routes: Routes = [
 
@@ -17,5 +18,6 @@ export const routes: Routes = [
   { path: 'apartamento/editar/:id', component: ApartamentoEdit },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   {path: 'register', component:RegisterComponent},
+  {path: 'apartamento/:id/reserva-manual', component: ReservaManualComponent},
   { path: '**', redirectTo: '/login' }
 ];

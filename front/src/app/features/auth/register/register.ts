@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms'; // Añadido NgForm
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { RegisterRequest } from '../../../core/models/auth.model';
@@ -8,41 +8,46 @@ import { RegisterRequest } from '../../../core/models/auth.model';
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink], // Añadimos RouterLink para navegar
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './register.html',
   styleUrl: './register.css'
 })
 export class RegisterComponent {
 
-  // Inicializamos el objeto con INQUILINO por defecto
   userData: RegisterRequest = {
-    nombreCompleto: '',
+    nombre: '',
+    apellidos: '',
     email: '',
     password: '',
+    dniPasaporte: '',
+    fechaNacimiento: '',
     rol: 'INQUILINO'
   };
 
+  // Variable separada para la confirmación
+  confirmarPassword: string = '';
   errorMessage: string = '';
 
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  onSubmit() {
+  // Comprueba si ambas contraseñas son idénticas
+  contrasenasCoinciden(): boolean {
+    return this.userData.password === this.confirmarPassword;
+  }
+
+  onSubmit(form: NgForm) {
+    // Doble validación de seguridad antes de enviar
+    if (form.invalid || !this.contrasenasCoinciden()) return;
+
     this.authService.register(this.userData).subscribe({
       next: (response) => {
-        // Guardamos el token que nos devuelve Spring Boot
         this.authService.guardarToken(response.token);
         this.errorMessage = '';
-
-        console.log("¡Registro Exitoso! Entrando a la app...");
-
-        // Redirigimos al home directamente
-        this.router.navigate(['/home']);
+        void this.router.navigate(['/home']);
       },
       error: (err) => {
-        // Capturamos el mensaje de error del backend (ej: "El email ya está registrado")
         this.errorMessage = err.error?.message || 'Error al crear la cuenta. Revisa los datos.';
-        console.error("Error en el registro:", err);
       }
     });
   }

@@ -15,6 +15,8 @@ public record ReservaManualRequest(
 
         // Datos del Inquilino Fantasma
         @NotBlank String nombreInquilino,
+        @NotBlank String apellidoInquilino,
+        @NotBlank String DNIInquilino,
         @NotBlank @Email String emailInquilino,
         String telefonoInquilino
 ) {

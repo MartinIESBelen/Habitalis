@@ -30,8 +30,11 @@ public class Usuario implements UserDetails {
     @EqualsAndHashCode.Include // Solo este campo se usa para equals/hashcode
     protected Long id;
 
-    @Column(name = "nombre_completo", nullable = false, length = 150)
-    private String nombreCompleto;
+    @Column(nullable = false, length = 50)
+    private String nombre;
+
+    @Column(nullable = false, length = 100)
+    private String apellidos;
 
     @Column(nullable = false, unique = true, length = 150)
     private String email;
@@ -42,8 +45,11 @@ public class Usuario implements UserDetails {
     @Column(length = 20)
     private String telefono;
 
-    @Column(name = "dni_pasaporte", length = 50)
+    @Column(name = "dni_pasaporte", length = 50, unique = true)
     private String dniPasaporte;
+
+    @Column(name = "fecha_nacimiento")
+    private java.time.LocalDate fechaNacimiento;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
