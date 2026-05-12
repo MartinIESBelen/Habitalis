@@ -1,6 +1,7 @@
 package com.apartmanagebackend.controller;
 
 import com.apartmanagebackend.dto.contrato.*;
+import com.apartmanagebackend.service.AlmacenamientoService;
 import com.apartmanagebackend.service.ContratoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,8 +19,8 @@ import java.util.List;
 public class ContratoController {
 
     private final ContratoService contratoService;
+    private final AlmacenamientoService almacenamientoService;
 
-    // POST: Crear la contrato para un apartamento
     @PostMapping("/apartamentos/{apartamentoId}")
     public ResponseEntity<ContratoResponse> crearContrato(
             @PathVariable Long apartamentoId,
@@ -30,7 +31,6 @@ public class ContratoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // POST: Crear contrato con inquilino manual
     @PostMapping("/apartamentos/{apartamentoId}/manual")
     public ResponseEntity<ContratoResponse> crearContratoManual(
             @PathVariable Long apartamentoId,
@@ -41,7 +41,6 @@ public class ContratoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // GET: Ver las contratos/contratos de un piso concreto
     @GetMapping("/apartamentos/{apartamentoId}")
     public ResponseEntity<List<ContratoResponse>> listarContratos(
             @PathVariable Long apartamentoId,
@@ -50,14 +49,12 @@ public class ContratoController {
         return ResponseEntity.ok(contratoService.listarContratosPorApartamento(apartamentoId, principal.getName()));
     }
 
-    // GET: Ver todos los contratos del propietario (Para la lista principal de Angular)
     @GetMapping
     @PreAuthorize("hasAuthority('PROPIETARIO')")
     public ResponseEntity<List<ContratoResponse>> obtenerMisContratos(Principal principal) {
         return ResponseEntity.ok(contratoService.obtenerMisContratosPropietario(principal.getName()));
     }
 
-    // GET: Ver el detalle de 1 solo contrato
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('PROPIETARIO')")
     public ResponseEntity<ContratoDetalleResponse> obtenerDetalleContrato(
@@ -67,7 +64,6 @@ public class ContratoController {
         return ResponseEntity.ok(detalle);
     }
 
-    // POST: Vincular un inquilino con un código
     @PostMapping("/vincular")
     public ResponseEntity<ContratoResponse> vincularContrato(
             @RequestBody VincularRequest request,
@@ -77,8 +73,20 @@ public class ContratoController {
         return ResponseEntity.ok(response);
     }
 
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('PROPIETARIO')")
+    public ResponseEntity<Void> eliminarContrato(
+            @PathVariable Long id,
+            Principal principal) {
+
+        contratoService.eliminarContrato(id, principal.getName());
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/{contratoId}/contrato")
-    public ResponseEntity<String> subirContrato(
+    @PreAuthorize("hasAuthority('PROPIETARIO')")
+    public ResponseEntity<String> subirContratoPdf(
             @PathVariable Long contratoId,
             @RequestParam("file") MultipartFile file) {
         try {
@@ -91,4 +99,16 @@ public class ContratoController {
                     .body("Error al procesar el documento: " + e.getMessage());
         }
     }
+
+    @DeleteMapping("/{contratoId}/contrato")
+    @PreAuthorize("hasAuthority('PROPIETARIO')")
+    public ResponseEntity<Void> eliminarContratoPdf(
+            @PathVariable Long contratoId,
+            Principal principal) {
+
+        contratoService.eliminarContratoPdf(contratoId, principal.getName());
+        return ResponseEntity.noContent().build();
+    }
+
+
 }

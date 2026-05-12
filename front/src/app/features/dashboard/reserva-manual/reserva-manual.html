@@ -1,105 +1,135 @@
-<div class="min-h-screen bg-gray-50 p-8">
+<div class="min-h-screen bg-gray-50 p-4 sm:p-8">
   <div class="max-w-3xl mx-auto">
-    <button [routerLink]="['/apartamento', apartamentoId]" class="text-gray-500 hover:text-gray-800 mb-6 flex items-center gap-2">
-      ← Cancelar y volver
+    <button [routerLink]="['/apartamento', apartamentoId]" class="text-blue-600 font-semibold hover:text-blue-800 mb-6 flex items-center gap-2 transition-colors">
+      &larr; Cancelar y volver
     </button>
 
-    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
-      <div class="bg-indigo-700 p-6 text-white text-center">
-        <h1 class="text-2xl font-bold">Registro Manual de Alquiler</h1>
-        <p class="text-indigo-200 text-sm">Crea un contrato y una cuenta fantasma para tu inquilino en un solo paso.</p>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="bg-blue-600 p-6 md:p-8 text-white text-center">
+        <h1 class="text-2xl md:text-3xl font-extrabold">Registro Manual de Alquiler</h1>
+        <p class="text-blue-100 mt-2 text-sm md:text-base">
+          Da de alta el contrato. Se creará automáticamente un perfil para el inquilino.
+        </p>
       </div>
 
-      <form (ngSubmit)="guardar(reservaForm)" #reservaForm="ngForm" class="p-8 space-y-8">
+      @if (mensajeError) {
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 m-6">
+          <p class="text-red-700 text-sm font-medium">{{ mensajeError }}</p>
+        </div>
+      }
+
+      <form [formGroup]="formContrato" (ngSubmit)="guardar()" class="p-6 md:p-8 space-y-8">
 
         <section>
-          <h3 class="text-indigo-900 font-bold uppercase text-xs tracking-widest mb-4 border-b pb-2">📅 Datos del Contrato</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex items-center gap-2 mb-4 border-b border-gray-100 pb-2">
+            <span class="text-xl">📅</span>
+            <h3 class="text-gray-800 font-bold uppercase text-xs tracking-widest">Datos del Contrato</h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Entrada</label>
-              <input type="date" name="fechaEntrada" [(ngModel)]="form.fechaEntrada" required #fechaEnt="ngModel"
-                     class="w-full border-gray-300 rounded-lg p-2 border focus:ring-2 focus:ring-indigo-500"
-                     [class.border-red-500]="fechaEnt.invalid && fechaEnt.touched">
+              <label class="block text-sm font-bold text-gray-700 mb-1">Fecha de Entrada</label>
+              <input type="date" formControlName="fechaEntrada"
+                     class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500"
+                     [class.border-red-500]="isInvalid('fechaEntrada')">
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Salida</label>
-              <input type="date" name="fechaSalida" [(ngModel)]="form.fechaSalida" required #fechaSal="ngModel"
-                     class="w-full border-gray-300 rounded-lg p-2 border focus:ring-2 focus:ring-indigo-500"
-                     [class.border-red-500]="fechaSal.invalid && fechaSal.touched">
-            </div>
-            <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Precio Mensual (€)</label>
-              <input type="number" name="precio" [(ngModel)]="form.precioBaseAlquiler" required min="1" #precio="ngModel"
-                     class="w-full border-gray-300 rounded-lg p-2 border focus:ring-2 focus:ring-indigo-500" placeholder="850"
-                     [class.border-red-500]="precio.invalid && precio.touched">
+              <label class="block text-sm font-bold text-gray-700 mb-1">Fecha de Salida</label>
+              <input type="date" formControlName="fechaSalida"
+                     class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500"
+                     [class.border-red-500]="isInvalid('fechaSalida')">
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Fianza Depositada (€)</label>
-              <input type="number" name="fianza" [(ngModel)]="form.fianza" required min="0" #fianza="ngModel"
-                     class="w-full border-gray-300 rounded-lg p-2 border focus:ring-2 focus:ring-indigo-500" placeholder="1700"
-                     [class.border-red-500]="fianza.invalid && fianza.touched">
+              <label class="block text-sm font-bold text-gray-700 mb-1">Precio Mensual (€)</label>
+              <input type="number" formControlName="precioBaseAlquiler" min="1" placeholder="Ej: 850"
+                     class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500"
+                     [class.border-red-500]="isInvalid('precioBaseAlquiler')">
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-1">Fianza Depositada (€)</label>
+              <input type="number" formControlName="fianza" min="0" placeholder="Ej: 1700"
+                     class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500"
+                     [class.border-red-500]="isInvalid('fianza')">
             </div>
           </div>
         </section>
 
         <section>
-          <h3 class="text-indigo-900 font-bold uppercase text-xs tracking-widest mb-4 border-b pb-2">👤 Datos del Inquilino</h3>
+          <div class="flex items-center gap-2 mb-4 border-b border-gray-100 pb-2">
+            <span class="text-xl">👤</span>
+            <h3 class="text-gray-800 font-bold uppercase text-xs tracking-widest">Datos del Inquilino</h3>
+          </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-              <input type="text" name="nombre" [(ngModel)]="form.nombreInquilino" required minlength="2" pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$" #nombre="ngModel"
-                     class="w-full border-gray-300 rounded-lg p-2 border focus:ring-2 focus:ring-indigo-500" placeholder="Juan"
-                     [class.border-red-500]="nombre.invalid && nombre.touched">
-              @if (nombre.invalid && nombre.touched) { <div class="text-red-500 text-xs mt-1">Nombre inválido.</div> }
+              <label class="block text-sm font-bold text-gray-700 mb-1">Nombre</label>
+              <input type="text" formControlName="nombreInquilino" placeholder="Ej: Juan"
+                     class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500"
+                     [class.border-red-500]="isInvalid('nombreInquilino')">
+              @if (isInvalid('nombreInquilino')) { <p class="text-red-500 text-xs mt-1">Nombre inválido.</p> }
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Apellidos</label>
-              <input type="text" name="apellidos" [(ngModel)]="form.apellidosInquilino" required minlength="2" pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$" #apellidos="ngModel"
-                     class="w-full border-gray-300 rounded-lg p-2 border focus:ring-2 focus:ring-indigo-500" placeholder="Pérez Gómez"
-                     [class.border-red-500]="apellidos.invalid && apellidos.touched">
-              @if (apellidos.invalid && apellidos.touched) { <div class="text-red-500 text-xs mt-1">Apellidos inválidos.</div> }
+              <label class="block text-sm font-bold text-gray-700 mb-1">Apellidos</label>
+              <input type="text" formControlName="apellidosInquilino" placeholder="Ej: Pérez Gómez"
+                     class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500"
+                     [class.border-red-500]="isInvalid('apellidosInquilino')">
+              @if (isInvalid('apellidosInquilino')) { <p class="text-red-500 text-xs mt-1">Apellidos inválidos.</p> }
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">DNI / Pasaporte</label>
-              <input type="text" name="dni" [(ngModel)]="form.dniInquilino" required pattern="^[A-Za-z0-9]{5,20}$" #dni="ngModel"
-                     class="w-full border-gray-300 rounded-lg p-2 border focus:ring-2 focus:ring-indigo-500 uppercase"
-                     [class.border-red-500]="dni.invalid && dni.touched">
-              @if (dni.invalid && dni.touched) { <div class="text-red-500 text-xs mt-1">Formato inválido (solo letras/números).</div> }
+              <label class="block text-sm font-bold text-gray-700 mb-1">DNI / Pasaporte / NIE</label>
+              <input type="text" formControlName="dniInquilino" placeholder="12345678A"
+                     class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500 uppercase"
+                     [class.border-red-500]="isInvalid('dniInquilino')">
+              @if (isInvalid('dniInquilino')) { <p class="text-red-500 text-xs mt-1">Formato inválido.</p> }
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento</label>
-              <input type="date" name="fechaNacimiento" [(ngModel)]="form.fechaNacimientoInquilino" required #fechaNac="ngModel"
-                     class="w-full border-gray-300 rounded-lg p-2 border focus:ring-2 focus:ring-indigo-500"
-                     [class.border-red-500]="fechaNac.invalid && fechaNac.touched">
-              @if (fechaNac.invalid && fechaNac.touched) { <div class="text-red-500 text-xs mt-1">Dato obligatorio.</div> }
+              <label class="block text-sm font-bold text-gray-700 mb-1">Fecha de Nacimiento</label>
+              <input type="date" formControlName="fechaNacimientoInquilino"
+                     class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500"
+                     [class.border-red-500]="isInvalid('fechaNacimientoInquilino')">
+              @if (isInvalid('fechaNacimientoInquilino')) { <p class="text-red-500 text-xs mt-1">Dato obligatorio.</p> }
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
-              <input type="email" name="email" [(ngModel)]="form.emailInquilino" required pattern="^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" #email="ngModel"
-                     class="w-full border-gray-300 rounded-lg p-2 border focus:ring-2 focus:ring-indigo-500" placeholder="juan@email.com"
-                     [class.border-red-500]="email.invalid && email.touched">
-              @if (email.invalid && email.touched) { <div class="text-red-500 text-xs mt-1">Email inválido.</div> }
+              <label class="block text-sm font-bold text-gray-700 mb-1">Correo Electrónico (Para el alta)</label>
+              <input type="email" formControlName="emailInquilino" placeholder="juan@email.com"
+                     class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500"
+                     [class.border-red-500]="isInvalid('emailInquilino')">
+              @if (isInvalid('emailInquilino')) { <p class="text-red-500 text-xs mt-1">Introduce un email válido.</p> }
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-              <input type="tel" name="telefono" [(ngModel)]="form.telefonoInquilino" #telefono="ngModel"
-                     class="w-full border-gray-300 rounded-lg p-2 border focus:ring-2 focus:ring-indigo-500" placeholder="+34 600 000 000">
+              <label class="block text-sm font-bold text-gray-700 mb-1">Teléfono</label>
+              <input type="tel" formControlName="telefonoInquilino" placeholder="+34 600 000 000"
+                     class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500">
             </div>
           </div>
         </section>
 
-        <button type="submit"
-                [disabled]="cargando || reservaForm.invalid"
-                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
-          {{ cargando ? 'Procesando registro...' : 'Finalizar y Crear Contrato' }}
-        </button>
+        <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+          <div class="flex items-start">
+            <div class="flex items-center h-5">
+              <input id="notificar" type="checkbox" formControlName="notificarInquilino" class="w-4 h-4 border border-gray-300 rounded focus:ring-blue-500 bg-white">
+            </div>
+            <div class="ml-3 text-sm">
+              <label for="notificar" class="font-bold text-gray-700 cursor-pointer">Permitir acceso al inquilino (Recomendado)</label>
+              <p class="text-gray-500 mt-1">El inquilino podrá solicitar una nueva contraseña usando su email en cualquier momento para ver sus recibos y contrato en ApartManage.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-gray-100">
+          <button type="submit"
+                  [disabled]="cargando || formContrato.invalid"
+                  class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            {{ cargando ? 'Guardando...' : 'Crear Contrato y Perfil' }}
+          </button>
+        </div>
+
       </form>
     </div>
   </div>

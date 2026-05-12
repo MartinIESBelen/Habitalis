@@ -37,4 +37,12 @@ export class ContratoService {
     formData.append('file', archivo);
     return this.http.post(`${this.apiUrl}/${contratoId}/contrato`, formData, { responseType: 'text' });
   }
+
+  borrarContrato(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
+  }
+
+  borrarContratoPdf(contratoId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${contratoId}/contrato`);
+  }
 }

@@ -12,7 +12,9 @@ public record ContratoManualRequest(
         @NotNull LocalDate fechaSalida,
         @NotNull @Positive BigDecimal precioBaseAlquiler,
 
-        // Datos del Inquilino Fantasma
+        BigDecimal fianza,
+        Boolean notificarInquilino,
+
         @NotBlank String nombreInquilino,
         @NotBlank String apellidosInquilino,
         @NotBlank String dniInquilino,

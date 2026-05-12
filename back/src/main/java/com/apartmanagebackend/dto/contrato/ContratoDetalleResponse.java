@@ -16,6 +16,7 @@ public record ContratoDetalleResponse(
         BigDecimal fianza,
         EstadoContrato estado,
         LocalDateTime creadoEn,
+        String contratoPdf,
         InquilinoPublico inquilino
 ) {
     public record InquilinoPublico(

@@ -27,5 +27,6 @@ export interface ContratoDetalle {
   fianza: number;
   estado: string;
   creadoEn: string;
+  contratoPdf?: string | null;
   inquilino: InquilinoPublico | null;
 }

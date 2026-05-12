@@ -22,10 +22,10 @@ public class AlmacenamientoService {
 
     private final UsuarioRepository usuarioRepository;
     private final ApartamentoRepository apartamentoRepository;
+
     @Value("${app.almacenamiento.raiz}")
     private String rutaRaiz;
 
-    // ── Rutas ─────────────────────────────────────────────────────────────────
 
     public String getCarpetaUsuario(Usuario usuario) {
         String nombre = limpiar(usuario.getNombre());
@@ -39,7 +39,6 @@ public class AlmacenamientoService {
                 + "/Viviendas/" + aptoNombre + "-" + apto.getId() + "/";
     }
 
-    // ── Inicialización de carpetas ─────────────────────────────────────────────
 
     public void inicializarCarpetasUsuario(Usuario usuario) {
         String base = getCarpetaUsuario(usuario);
@@ -51,7 +50,6 @@ public class AlmacenamientoService {
         crearDirectorios(base + "img", base + "docs");
     }
 
-    // ── Operaciones de archivos ────────────────────────────────────────────────
 
     public String guardarImagenPerfil(Usuario usuario, MultipartFile file) throws IOException {
         String carpeta = getCarpetaUsuario(usuario) + "perfil/";
@@ -91,7 +89,6 @@ public class AlmacenamientoService {
         }
     }
 
-    // ── Helpers privados ──────────────────────────────────────────────────────
 
     private void guardarFisicamente(MultipartFile file, String carpeta, String nombre) throws IOException {
         Files.createDirectories(Paths.get(carpeta));

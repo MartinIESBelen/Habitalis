@@ -19,7 +19,6 @@ export class RegisterComponent {
 
   errorMessage: string = '';
 
-  // 1. Declaración del Formulario Reactivo
   registerForm: FormGroup = this.fb.nonNullable.group({
     nombre: ['', [Validators.required, Validators.minLength(2), Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)]],
     apellidos: ['', [Validators.required, Validators.minLength(2), Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)]],
@@ -33,14 +32,12 @@ export class RegisterComponent {
     validators: this.passwordsMatchValidator
   });
 
-  // 2. Validador personalizado para las contraseñas
   private passwordsMatchValidator(control: AbstractControl): ValidationErrors | null {
     const password = control.get('password')?.value;
     const passwordConfirm = control.get('passwordConfirm')?.value;
     return password === passwordConfirm ? null : { passwordsMismatch: true };
   }
 
-  // 3. Getters rápidos para el HTML
   get nombreControl() { return this.registerForm.get('nombre'); }
   get apellidosControl() { return this.registerForm.get('apellidos'); }
   get dniControl() { return this.registerForm.get('dniPasaporte'); }
@@ -49,14 +46,12 @@ export class RegisterComponent {
   get passwordControl() { return this.registerForm.get('password'); }
   get passwordConfirmControl() { return this.registerForm.get('passwordConfirm'); }
 
-  // 4. Envío de datos
   onSubmit() {
     if (this.registerForm.invalid) {
-      this.registerForm.markAllAsTouched(); // Muestra todos los errores si el usuario le da a enviar pronto
+      this.registerForm.markAllAsTouched();
       return;
     }
 
-    // Extraemos los valores y los convertimos al modelo que espera tu backend
     const formValues = this.registerForm.getRawValue();
     const requestData: RegisterRequest = {
       nombre: formValues.nombre,

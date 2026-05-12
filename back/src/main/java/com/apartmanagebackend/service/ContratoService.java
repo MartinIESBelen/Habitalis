@@ -4,19 +4,15 @@ import com.apartmanagebackend.domain.*;
 import com.apartmanagebackend.domain.enums.EstadoContrato;
 import com.apartmanagebackend.dto.contrato.*;
 import com.apartmanagebackend.repository.ApartamentoRepository;
-import com.apartmanagebackend.repository.ContratoRepository; // Asumo que aún no has renombrado el repositorio
+import com.apartmanagebackend.repository.ContratoRepository;
 import com.apartmanagebackend.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,16 +24,8 @@ public class ContratoService {
     private final ApartamentoRepository apartamentoRepository;
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
-
-    @Value("${app.almacenamiento.raiz}")
-    private String rutaRaiz;
-
-    private String getCarpetaVivienda(Apartamento apartamento) {
-        Usuario prop = apartamento.getPropietario();
-        String propNombre = prop.getNombre().replaceAll("[^a-zA-Z0-9]", "_");
-        String aptoNombre = apartamento.getNombreInterno().replaceAll("[^a-zA-Z0-9]", "_");
-        return "Usuarios/" + propNombre + "-" + prop.getId() + "/Viviendas/" + aptoNombre + "-" + apartamento.getId() + "/";
-    }
+    private final RecuperacionPasswordService recuperacionService;
+    private final AlmacenamientoService almacenamientoService;
 
     @Transactional
     public ContratoResponse crearContrato(Long apartamentoId, ContratoRequest request, String emailPropietario) {
@@ -64,7 +52,17 @@ public class ContratoService {
         validarFechas(request.fechaEntrada(), request.fechaSalida());
 
         Apartamento apartamento = obtenerApartamentoVerificandoPropietario(apartamentoId, emailPropietario);
+
         Usuario inquilino = obtenerOCrearInquilinoFantasma(request);
+
+        if (Boolean.TRUE.equals(request.notificarInquilino())) {
+            try {
+                recuperacionService.solicitarRecuperacion(inquilino.getEmail());
+            } catch (Exception e) {
+                System.err.println("Aviso: No se pudo notificar al inquilino por email: " + e.getMessage());
+            }
+        }
+
         String codigoInterno = "MANUAL-" + UUID.randomUUID().toString().substring(0, 5).toUpperCase();
 
         Contrato nuevoContrato = Contrato.builder()
@@ -74,6 +72,7 @@ public class ContratoService {
                 .fechaEntrada(request.fechaEntrada())
                 .fechaSalida(request.fechaSalida())
                 .precioBaseAlquiler(request.precioBaseAlquiler())
+                .fianza(request.fianza())
                 .estado(EstadoContrato.CONFIRMADA)
                 .build();
 
@@ -99,25 +98,17 @@ public class ContratoService {
     }
 
     public List<ContratoResponse> listarContratosPorApartamento(Long apartamentoId, String emailPropietario) {
-        obtenerApartamentoVerificandoPropietario(apartamentoId, emailPropietario); // Solo para validar permisos
-
-        return contratoRepository.findByApartamentoId(apartamentoId)
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
+        obtenerApartamentoVerificandoPropietario(apartamentoId, emailPropietario);
+        return contratoRepository.findByApartamentoId(apartamentoId).stream().map(this::mapToResponse).toList();
     }
 
     public List<ContratoResponse> obtenerMisContratosPropietario(String emailPropietario) {
-        return contratoRepository.findMisContratosComoPropietario(emailPropietario)
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
+        return contratoRepository.findMisContratosComoPropietario(emailPropietario).stream().map(this::mapToResponse).toList();
     }
 
     public ContratoDetalleResponse obtenerDetalleContrato(Long contratoId, String emailPropietario) {
         Contrato r = contratoRepository.findByIdAndPropietarioEmail(contratoId, emailPropietario)
                 .orElseThrow(() -> new RuntimeException("Contrato no encontrado o no tienes permisos"));
-
         return mapToDetalleResponse(r);
     }
 
@@ -128,17 +119,43 @@ public class ContratoService {
         Contrato contrato = contratoRepository.findById(contratoId)
                 .orElseThrow(() -> new RuntimeException("Contrato no encontrado"));
 
-        String rutaRelativaVivienda = getCarpetaVivienda(contrato.getApartamento());
-        String carpetaDestinoFisica = rutaRaiz + rutaRelativaVivienda + "docs/";
-        Files.createDirectories(Paths.get(carpetaDestinoFisica));
+        String rutaRelativa = almacenamientoService.guardarDocumentoVivienda(contrato.getApartamento(), file);
 
-        String nombreArchivoUnico = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-        Path rutaFinalFisica = Paths.get(carpetaDestinoFisica + nombreArchivoUnico);
-        Files.copy(file.getInputStream(), rutaFinalFisica);
-
-        contrato.setContratoPdf(rutaRelativaVivienda + "docs/" + nombreArchivoUnico);
+        contrato.setContratoPdf(rutaRelativa);
         contratoRepository.save(contrato);
     }
+
+    @Transactional
+    public void eliminarContratoPdf(Long contratoId, String emailPropietario) {
+        Contrato contrato = contratoRepository.findByIdAndPropietarioEmail(contratoId, emailPropietario)
+                .orElseThrow(() -> new RuntimeException("Contrato no encontrado o no tienes permisos"));
+
+        if (contrato.getContratoPdf() != null && !contrato.getContratoPdf().isEmpty()) {
+            try {
+                almacenamientoService.eliminarArchivo(contrato.getContratoPdf());
+            } catch (IOException e) {
+                throw new RuntimeException("No se pudo borrar el archivo físico: " + e.getMessage());
+            }
+            contrato.setContratoPdf(null);
+            contratoRepository.save(contrato);
+        }
+    }
+
+    @Transactional
+    public void eliminarContrato(Long contratoId, String emailPropietario) {
+        Contrato contrato = contratoRepository.findByIdAndPropietarioEmail(contratoId, emailPropietario)
+                .orElseThrow(() -> new RuntimeException("Contrato no encontrado o no tienes permisos"));
+
+        if (contrato.getContratoPdf() != null && !contrato.getContratoPdf().isEmpty()) {
+            try {
+                almacenamientoService.eliminarArchivo(contrato.getContratoPdf());
+            } catch (IOException e) {
+                System.err.println("Aviso: No se pudo borrar el archivo PDF físico: " + e.getMessage());
+            }
+        }
+        contratoRepository.delete(contrato);
+    }
+
 
     private void validarFechas(java.time.LocalDate entrada, java.time.LocalDate salida) {
         if (salida.isBefore(entrada) || salida.isEqual(entrada)) {
@@ -192,9 +209,17 @@ public class ContratoService {
             );
         }
         return new ContratoDetalleResponse(
-                r.getId(), r.getCodigoVinculacion(), r.getApartamento().getNombreInterno(),
-                r.getFechaEntrada(), r.getFechaSalida(), r.getPrecioBaseAlquiler(),
-                r.getFianza(), r.getEstado(), r.getCreadoEn(), inquilinoData
+                r.getId(),
+                r.getCodigoVinculacion(),
+                r.getApartamento().getNombreInterno(),
+                r.getFechaEntrada(),
+                r.getFechaSalida(),
+                r.getPrecioBaseAlquiler(),
+                r.getFianza(),
+                r.getEstado(),
+                r.getCreadoEn(),
+                r.getContratoPdf(),
+                inquilinoData
         );
     }
 }

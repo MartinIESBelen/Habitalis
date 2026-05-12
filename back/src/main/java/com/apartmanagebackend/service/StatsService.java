@@ -21,7 +21,6 @@ import java.util.List;
 public class StatsService {
 
     private final ApartamentoRepository apartamentoRepository;
-    // ¡NUEVO! Único repositorio financiero
     private final TransaccionRepository transaccionRepository;
     private final IncidenciaRepository incidenciaRepository;
     private final UsuarioRepository usuarioRepository;
